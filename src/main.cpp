@@ -5,11 +5,9 @@
 #include <array>
 #include <cstdlib>
 
-using namespace std;
+//https://www.nongnu.org/pngpp/doc/0.2.0/
+#include <png++/png.hpp>
 
-/**
- * Code example from @{link https://www.glprogramming.com/red/chapter09.html}
- */
 
 #define checkImageWidth 640
 #define checkImageHeight 640
@@ -27,16 +25,19 @@ void makeCheckImage(void)
          checkImage[i][j][0] = (GLubyte) (rand() % 255);
          checkImage[i][j][1] = (GLubyte) (rand() % 255);
          checkImage[i][j][2] = (GLubyte) (rand() % 255);
-         checkImage[i][j][3] = (GLubyte) 255;
+         checkImage[i][j][3] = (GLubyte) 100;
       }
    }
 }
+
+png::image< png::rgba_pixel > image("assets/globe.png");
 
 static GLuint texName;
 
 void init(void)
 {    
-   glClearColor (0.0, 0.0, 0.0, 0.0);
+   glClearColor(1, 1, 1, 1);
+   //glClearColor (0.0, 0.0, 0.0, 0.0);
    glShadeModel(GL_FLAT);
    glEnable(GL_DEPTH_TEST);
 
@@ -70,6 +71,8 @@ void reshape(int w, int h)
 }
 
 
+GLvoid* getImageData(png::image< png::rgba_pixel > & img) ;
+
 void renderScene(void) {
     /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
@@ -87,14 +90,33 @@ void renderScene(void) {
     // glFlush();
     // glDisable(GL_TEXTURE_2D);
 
+   glEnable(GL_BLEND);
+   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glRasterPos2d(0, 0);
    // glRasterPos2i(-window_width / 2, -window_height);
-   glDrawPixels(checkImageWidth, checkImageHeight, GL_RGBA,
-                GL_UNSIGNED_BYTE, checkImage);
+   glDrawPixels(image.get_width(), image.get_height(), GL_RGBA,
+                GL_UNSIGNED_BYTE, getImageData(image));
 
    glutSwapBuffers();
    glutPostRedisplay();
+}
+
+GLvoid* getImageData(png::image< png::rgba_pixel > & img) 
+{
+   std::vector<GLubyte>* tmp = new std::vector<GLubyte>();
+   for (size_t y = img.get_height() - 1; y > 0; --y)
+   {
+      for (size_t x = 0; x < img.get_width(); ++x)
+      {
+            tmp->push_back(img[y][x].red);
+            tmp->push_back(img[y][x].green);
+            tmp->push_back(img[y][x].blue);
+            tmp->push_back(img[y][x].alpha);
+      }
+   }
+
+   return tmp->data();
 }
 
 void keyboard (unsigned char key, int x, int y)

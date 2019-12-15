@@ -1,6 +1,6 @@
 CC= g++
 FLAGS= -std=c++17 -pg -Wall -Wextra -Iinclude
-LINKS= -lGL -lGLU -lglut
+LINKS= -lGL -lGLU -lglut `libpng-config --ldflags --libs` 
 BIN= BestRsProject
 
 SRC= $(shell find src -type f -name *.cpp)
