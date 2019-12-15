@@ -1,5 +1,5 @@
 CC= g++
-FLAGS= -std=c++17 -pg -Wall -Wextra
+FLAGS= -std=c++17 -pg -Wall -Wextra -Iinclude
 LINKS= -lGL -lGLU -lglut
 BIN= BestRsProject
 
