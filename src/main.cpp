@@ -9,6 +9,7 @@
 #include <png++/png.hpp>
 
 
+
 #define checkImageWidth 640
 #define checkImageHeight 640
 #define window_width 640
@@ -30,7 +31,8 @@ void makeCheckImage(void)
    }
 }
 
-png::image< png::rgba_pixel > image("assets/globe.png");
+png::image< png::rgba_pixel > image("assets/heightEdited.png");
+
 
 static GLuint texName;
 
@@ -142,7 +144,7 @@ int main(int argc, char **argv)
     glutCreateWindow("BestRsProject");
 
     init();
-
+ 
     glutDisplayFunc(renderScene);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
