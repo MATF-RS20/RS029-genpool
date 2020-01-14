@@ -4,212 +4,79 @@
 #include <vector>
 #include <array>
 #include <cstdlib>
-#include <map>
-#include <iterator>
+#include <cmath>
 
 //https://www.nongnu.org/pngpp/doc/0.2.0/
 #include <png++/png.hpp>
 
-#define checkImageWidth 640
-#define checkImageHeight 640
+#include "simulation.cpp"
+
+#include "ales.hpp"
+
 #define window_width 1533
 #define window_height 767
-#define full 1533*767*3
-unsigned char* buffPixels= (unsigned char *)malloc(sizeof(char)*full);
 
-static GLubyte checkImage[checkImageHeight][checkImageWidth][4];
+// -------------------------------VAZNO-----------------------------------------
+Simulation sim{100, 100'000};
 
-std::map<std::tuple<unsigned char, unsigned char,unsigned char>, double> color_value_map;
+//params
+HeatMap heightMap{"assets/heightEdited.png"};
+HeatMap moistureMap{"assets/precipitationEdited.png"};
+HeatMap heatMap{"assets/tmpEdited.png"};
+
+const double heightMapThreshold{24.249};
+const double heatMapThreshold{24.249};
+const double moistureMapThreshold{24.249};
+
+// -------------------------------TMP state-------------------------------------
 png::image<png::rgba_pixel> image("assets/precipitationEdited.png");
+GLvoid *imageData;
 
-
-
-// ovo mi sluzi samo da odredim poziciju labele sa slike 
-void motion(int x, int y)
-{
-    y = glutGet( GLUT_WINDOW_HEIGHT ) - y;
-
-    unsigned char pixel[4];
-    glReadPixels(x, y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
-    std::cout << "R: " << (int)pixel[0] <<std:: endl;
-    std::cout << "G: " << (int)pixel[1] << std::endl;
-    std::cout << "B: " << (int)pixel[2] << std::endl;
-    std::cout << std::endl;
-    std::cout <<"kordinate" << "x:" <<x << "y:" << y << std::endl;
-
-    
-}
-
-void make_map(int x_pocetak, int y, int x_kraj)
-{
-
-    y = glutGet(GLUT_WINDOW_HEIGHT) - y;
-   color_value_map = {};
-
-   unsigned char pixel[4];
-
-   for (auto i = x_pocetak; i <= x_kraj; i++)
-   {
-      for(auto y=24;y<42;y++){
-      glReadPixels(i, y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
-
-      auto kljuc = std::make_tuple(pixel[0],pixel[1],pixel[2]);
-
-      auto iter = color_value_map.find(kljuc);
-
-      if (iter == color_value_map.end())
-      {
-
-         color_value_map[kljuc] = (double)(i - x_pocetak) / (x_kraj - x_pocetak);
-      }
-   }
-   }
-
-  for (int x = 98; x < 192; x++)
-  {
-     for (int y = 284; y < 334 ; y++)
-     {
-         glReadPixels(x, y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
-   auto kljuc = std::make_tuple(pixel[0], pixel[1],pixel[2]);
-   auto iter = color_value_map.find(kljuc);
-   if (iter == color_value_map.end())
-      {
-
-         color_value_map[kljuc] = 1;
-      }
-        
-     }
-     
-  }
-  
-
-   
-
-    
-
-
-   for (auto m : color_value_map)
-   {
-
-      //  std::cout<< std::get<0>(m.first)<<std::endl;
-      //   std::cout<< std::get<1>(m.first)<<std::endl;
-      //    std::cout<< std::get<2>(m.first)<<std::endl;
-       std::cout << "vrednost " << m.second << std::endl;
-   }
-//---------------------------------------------------------------------------
-
-
-  
-
-   FILE *imageFile;
-   int height=window_height,width=window_width;
-
-   imageFile=fopen("image.ppm","wb");
-   if(imageFile==NULL){
-      perror("ERROR: Cannot open output file");
-      exit(EXIT_FAILURE);
-   }
-
-   fprintf(imageFile,"P6\n");               // P6 filetype
-   fprintf(imageFile,"%d %d\n",width,height);   // dimensions
-   fprintf(imageFile,"255\n");              // Max pixel
- 
-    int x_kor=1;
-    int y_kor=window_height;
-    
-   for (int i = 0;i < (full) ;i=i+3)
-   {
-      glReadPixels(x_kor, y_kor, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
-
-      auto kljuc = std::make_tuple(pixel[0],pixel[1],pixel[2]);
-
-      auto iter = color_value_map.find(kljuc);
-      //std::cout<<iter->second<< "  ";
-      if (iter->second>=0 && iter->second<=1 )
-      {
-      buffPixels[i]= 0;
-   
-      buffPixels[i+1]= 0;
-      buffPixels[i+2]= iter->second * 255;
-        
-      }
-      else{
-       //  std::cout<< "nema ";
-      buffPixels[i]= 255;
-      buffPixels[i+1]= 0;
-      buffPixels[i+2]=0;
-
-
-      }
-
-      if(x_kor<1533)
-      x_kor++;
-      else{
-         x_kor=1;
-         y_kor--;
-      }
-   
-
-   }
-
-  
-   fwrite(buffPixels,1,full,imageFile);
-   fclose(imageFile);
-
-
-
-//-------------------------------------------------------------------------------
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void makeCheckImage(void)
-{
-   int i, j, c;
-
-   for (i = 0; i < checkImageHeight; i++)
-   {
-      for (j = 0; j < checkImageWidth; j++)
-      {
-         checkImage[i][j][0] = (GLubyte)(rand() % 255);
-         checkImage[i][j][1] = (GLubyte)(rand() % 255);
-         checkImage[i][j][2] = (GLubyte)(rand() % 255);
-         checkImage[i][j][3] = (GLubyte)100;
-      }
-   }
-}
-
-
+// --------------------------------------------------------------------------
 
 static GLuint texName;
+/**
+ * Tests png image lib functions and methods
+ */
+void testEdit()
+{
+   for (int y = 500; y < 700; y++)
+   {
+      for (int x = 500; x < 700; x++)
+      {
+         image[y][x] = png::rgba_pixel(255, 0, 0, 255);
+      }
+   }
+}
+/**
+ * Tests png image lib functions and methods
+ */
+void invertColors(png::image<png::rgba_pixel> &image)
+{
 
-void init(void)
+   std::cout << "inverting colors on image\n";
+
+   const int h = image.get_height();
+   const int w = image.get_width();
+
+   for (int i = 0; i < h; i++)
+   {
+      for (int j = 0; j < w; j++)
+      {
+         png::rgba_pixel pix = image.get_pixel(j, i);
+         image[i][j].blue = 255 - pix.red;
+      }
+   }
+
+   std::cout << "completed color invertion\n";
+}
+
+void initGlut(void)
 {
    glClearColor(1, 1, 1, 1);
    //glClearColor (0.0, 0.0, 0.0, 0.0);
    glShadeModel(GL_FLAT);
    glEnable(GL_DEPTH_TEST);
-
-   // makeCheckImage();
    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
    glGenTextures(1, &texName);
@@ -221,11 +88,17 @@ void init(void)
                    GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                    GL_NEAREST);
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, checkImageWidth,
-                checkImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                checkImage);
+   /* glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, checkImageWidth, 
+                checkImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 
+                checkImage); */
 }
 
+void initState()
+{
+   invertColors(image);
+   std::cout << "getting height map data\n";
+   imageData = getImageData(moistureMap);
+}
 void reshape(int w, int h)
 {
    glViewport(-window_width / 2, -window_height / 2, (GLsizei)w, (GLsizei)h);
@@ -238,124 +111,32 @@ void reshape(int w, int h)
    glTranslatef(0.0, 0.0, -3.6);
 }
 
-// 1.citam iz slike
-// 2. smestam u novu sliku ne u istu
-// 3. izdvojiti f za odredjivanje vr iz mape
-// 4. naci gresku
-// 5. preseliti kod u posebnu klasu
-// Andrej misli da je to dosta
-
-// Maja
-// 1. pravila implementacija
-
-
-double findValue(int r, int g,int b){
-
-   auto kljuc = std::make_tuple(r, g, b);
-
-   auto iter = color_value_map.find(kljuc);
-
-   if (iter == color_value_map.end())
-   return 0.0;
-   else
-   return iter->second;
-}
-
-/*
-GLvoid*  make_new_image(png::image<png::rgba_pixel> &img)
+void renderFrame()
 {
-
-   std::vector<GLubyte> *tmp = new std::vector<GLubyte>();
-
-   for (size_t y = img.get_height() - 1; y > 0; --y)
-   {
-      for (size_t x = 0; x < img.get_width(); ++x)
-      {
-         unsigned char pixel[4];
-         glReadPixels(x, y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
-          double alfa= findValue((int)pixel[0], (int)pixel[1], (int)pixel[2]);
-         img[y][x].red = (float) alfa * 255;
-         img[y][x].green = (float)alfa * 255;
-         img[y][x].blue = (float)alfa* 255;
-         img[y][x].alpha = (float)alfa;
-
-         tmp->push_back(img[y][x].red);
-         tmp->push_back(img[y][x].green);
-         tmp->push_back(img[y][x].blue);
-         tmp->push_back(img[y][x].alpha);
-      }
-   }
-
-   return tmp->data();
-
-         // std::cout << iter->second << "  ";
-         //png::rgba_pixel p = png::rgba_pixel((double)255, (double)1, (double)1,iter->second);
-         // image.set_pixel(x,y,p);
-
-         // image[y][x] = png::rgba_pixel(255,1,1, iter->second);
-
-} */
-
-
-void make_new_image(){
-
-for(auto x=1100;x<=1150;x++){
-      for(auto y=270;y<=357;y++){
-       unsigned char pixel[4];
-        glReadPixels(x, y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
-        auto kljuc = std::make_tuple((int)pixel[0],(int)pixel[1],(int)pixel[2]);
-        
-        auto iter = color_value_map.find(kljuc);
-        if(iter == color_value_map.end()) continue;
-        std::cout<<iter->second<<"  " ;
-      png::rgba_pixel p = png::rgba_pixel((int)iter->second * 255,  1, 1,(int)iter->second);
-      image.set_pixel(x,y,p);
-   
-  // image[y][x] = png::rgba_pixel(255,1,1,iter->second);
-    
-
-      }
-
-}
-}
-
-
-GLvoid *getImageData(png::image<png::rgba_pixel> &img);
-
-void renderScene(void)
-{
-   /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-    glBindTexture(GL_TEXTURE_2D, texName);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0, 0.0); glVertex3f(-1, -1.0, 0.0);
-    glTexCoord2f(0.0, 1.0); glVertex3f(-1, 1.0, 0.0);
-    glTexCoord2f(1.0, 1.0); glVertex3f(1, 1.0, 0.0);
-    glTexCoord2f(1.0, 0.0); glVertex3f(1, -1.0, 0.0);
-
-    glEnd(); */
-
-   // glFlush();
-   // glDisable(GL_TEXTURE_2D);
-
-   // glEnable(GL_BLEND);
-      glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glEnable(GL_BLEND);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glRasterPos2d(0, 0);
    // glRasterPos2i(-window_width / 2, -window_height);
-
    glDrawPixels(image.get_width(), image.get_height(), GL_RGBA,
-                GL_UNSIGNED_BYTE, getImageData(image));
- 
+                GL_UNSIGNED_BYTE, imageData);
+
    glutSwapBuffers();
+}
+
+void engine(void)
+{
+
+   sim.nextFrame();
+   renderFrame();
+
    glutPostRedisplay();
 }
 
 GLvoid *getImageData(png::image<png::rgba_pixel> &img)
 {
-   std::vector<GLubyte> *tmp = new std::vector<GLubyte>();
 
+   std::vector<GLubyte> *tmp = new std::vector<GLubyte>();
    for (size_t y = img.get_height() - 1; y > 0; --y)
    {
       for (size_t x = 0; x < img.get_width(); ++x)
@@ -369,10 +150,6 @@ GLvoid *getImageData(png::image<png::rgba_pixel> &img)
 
    return tmp->data();
 }
-
-
-
-
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -381,40 +158,147 @@ void keyboard(unsigned char key, int x, int y)
    case 27:
       exit(0);
       break;
-   case 'a':
-      make_new_image();
-      break;
-
-   case 'm':
-      make_map(520, 731,1015);
-      break;
    default:
       break;
    }
 }
 
-int main(int argc, char **argv)
+void registerIOCallbacks()
 {
-  
+   /* This line is wicked. We don't want to use glut timer func since we want
+    * as much frames as possible. Not mandatory for this kind of application
+    * but nice shortcut. We register engine in place of render. Engine renders
+    * and manages state. Also engine calls it self by invoking post redisplay
+    * which gives oportunity for other io functions to execute
+    */
+   glutDisplayFunc(engine);
+   glutReshapeFunc(reshape);
+   glutKeyboardFunc(keyboard);
+}
 
-   
-
-   
-
-   srand(10);
-   glutInit(&argc, argv);
-   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+void initWindow()
+{
    glutInitWindowPosition(100, 100);
    glutInitWindowSize(window_width, window_height);
    glutCreateWindow("BestRsProject");
-   init();
-   glutDisplayFunc(renderScene);
-   glutReshapeFunc(reshape);
-   glutKeyboardFunc(keyboard);
-    glutPassiveMotionFunc(motion);
+}
+
+/**
+ * Init everything 
+ */
+void init(int argc, char **argv)
+{
+   // init the lib
+   glutInit(&argc, argv);
+   srand(10);
+   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+   initWindow();
+   initGlut();
+   normalizeParams();
+   initState();
+   registerIOCallbacks();
+}
+
+int main(int argc, char **argv)
+{
+   init(argc, argv);
    glutMainLoop();
+}
 
+void normalizeParams()
+{
+   normalizeParam(moistureMap, 520, 735, 1016, 60);
+   //blackToRed(heightMap);
+}
 
+void blackToRed(HeatMap &map)
+{
+   std::cout << "converting black to red\n";
 
-   return 0;
+   const int h = image.get_height();
+   const int w = image.get_width();
+
+   for (int i = 0; i < h; i++)
+      for (int j = 0; j < w; j++)
+         if (dist(toRGB(map.get_pixel(j, i)), toRGB(png::rgba_pixel(0, 0, 0, 0))) < 24.249)
+         {
+            pixToRed(map, i, j);
+         }
+
+   std::cout << "converted black to red\n";
+}
+
+LabelMap initLabelMap(
+    HeatMap param,
+    int labelStartX,
+    int labelStartY,
+    int labelEndX
+) {
+   std::cout << "init label map\n";
+   LabelMap map;
+
+   const int range = labelEndX - labelStartX;
+
+   std::cout << "range is: " << range << std::endl;
+
+   for (int i = 0; i < range; i++) {
+      auto pix = param.get_pixel(labelStartX + i, labelStartY);
+      RGB color = {pix.red, pix.blue, pix.green};
+
+      auto iter = map.find(color);
+      
+      if (iter != map.end()) continue;
+
+      const double value = (double) i / range;
+      map[color] = value;
+   }
+   std::cout << map.size() << "/" << range << " colors in label map\n";
+
+   return map;
+}
+
+double dist(const RGB& c1, const RGB& c2){
+   return sqrt(pow(c1[0] - c2[0], 2) + pow(c1[1] - c2[1], 2) + pow(c1[2] - c2[2], 2));
+}
+
+/**
+ * Distance is minimal distance between two objects
+ */
+double dist(LabelMap map, const RGB& c) {
+   auto i = map.begin();
+   double min = dist(c, i->first);
+
+   i++;
+   for (; i != map.end(); i++) {
+      auto curDist = dist(i->first, c);
+      min = min > curDist ? curDist : min;
+   }
+   
+   return min;
+}
+
+void normalizeParam(
+   HeatMap param,
+   int labelStartX,
+   int labelStartY,
+   int labelEndX,
+   double threshold
+) {
+   LabelMap labelMap = initLabelMap(param, labelStartX, labelStartY, labelEndX);
+
+   for (size_t y = param.get_height() - 1; y > 0; --y) {
+      std::cout << y << std::endl;
+      for (size_t x = 0; x < param.get_width(); ++x) {
+         const auto d = dist(labelMap, toRGB(param[y][x]));
+         // std::cout << d << std::endl;
+         if (d > threshold) {
+            param[y][x].red = 0;
+            param[y][x].green = 0;
+            param[y][x].blue = 0;
+            param[y][x].alpha = 255;
+         }
+      }
+   }
+
+   std::cout << "ended norm param\n";
 }

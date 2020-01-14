@@ -1,6 +1,6 @@
 CC= g++
 FLAGS= -std=c++17 -pg -Wall -Wextra -Iinclude
-LINKS= -lGL -lGLU -lglut `libpng-config --ldflags --libs` 
+LINKS= -lGL -lGLU -lglut `libpng-config --ldflags --libs` -lm
 BIN= BestRsProject
 
 SRC= $(shell find src -type f -name *.cpp)
@@ -14,7 +14,7 @@ src/%.cpp:
 	$(CC) $(FLAGS) -o build/$* -c $@
 
 bin: $(OBJECT)
-	$(CC) $(FLAGS) -o bin/$(BIN) $< $(LINKS)
+	$(CC) $(FLAGS) -o bin/$(BIN) $^ $(LINKS)
 
 build/%.o: src/%.cpp
 	$(CC) $(FLAGS) -o build/$*.o -c $^
