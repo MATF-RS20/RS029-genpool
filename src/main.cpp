@@ -97,7 +97,7 @@ void initState()
 {
    invertColors(image);
    std::cout << "getting height map data\n";
-   imageData = getImageData(heatMap);
+   imageData = getImageData(moistureMap);
 }
 void reshape(int w, int h)
 {
@@ -207,8 +207,7 @@ int main(int argc, char **argv)
 
 void normalizeParams()
 {
-   //(Normalizer(moistureMap, 520, 1016, 735, 30))();
-   (Normalizer(heatMap, 290, 1245, 700, 30))();
+   normalizeParam(moistureMap, 520, 735, 1016, 60);
    //blackToRed(heightMap);
 }
 
@@ -229,8 +228,77 @@ void blackToRed(HeatMap &map)
    std::cout << "converted black to red\n";
 }
 
+LabelMap initLabelMap(
+    HeatMap param,
+    int labelStartX,
+    int labelStartY,
+    int labelEndX
+) {
+   std::cout << "init label map\n";
+   LabelMap map;
+
+   const int range = labelEndX - labelStartX;
+
+   std::cout << "range is: " << range << std::endl;
+
+   for (int i = 0; i < range; i++) {
+      auto pix = param.get_pixel(labelStartX + i, labelStartY);
+      RGB color = {pix.red, pix.blue, pix.green};
+
+      auto iter = map.find(color);
+      
+      if (iter != map.end()) continue;
+
+      const double value = (double) i / range;
+      map[color] = value;
+   }
+   std::cout << map.size() << "/" << range << " colors in label map\n";
+
+   return map;
+}
+
 double dist(const RGB& c1, const RGB& c2){
    return sqrt(pow(c1[0] - c2[0], 2) + pow(c1[1] - c2[1], 2) + pow(c1[2] - c2[2], 2));
 }
 
+/**
+ * Distance is minimal distance between two objects
+ */
+double dist(LabelMap map, const RGB& c) {
+   auto i = map.begin();
+   double min = dist(c, i->first);
 
+   i++;
+   for (; i != map.end(); i++) {
+      auto curDist = dist(i->first, c);
+      min = min > curDist ? curDist : min;
+   }
+   
+   return min;
+}
+
+void normalizeParam(
+   HeatMap param,
+   int labelStartX,
+   int labelStartY,
+   int labelEndX,
+   double threshold
+) {
+   LabelMap labelMap = initLabelMap(param, labelStartX, labelStartY, labelEndX);
+
+   for (size_t y = param.get_height() - 1; y > 0; --y) {
+      std::cout << y << std::endl;
+      for (size_t x = 0; x < param.get_width(); ++x) {
+         const auto d = dist(labelMap, toRGB(param[y][x]));
+         // std::cout << d << std::endl;
+         if (d > threshold) {
+            param[y][x].red = 0;
+            param[y][x].green = 0;
+            param[y][x].blue = 0;
+            param[y][x].alpha = 255;
+         }
+      }
+   }
+
+   std::cout << "ended norm param\n";
+}
