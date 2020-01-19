@@ -6,6 +6,7 @@
 
 #include "HeatMap.hpp"
 #include "LabelMap.hpp"
+#include "Normalizer.hpp"
 
 #define pixToStr(pix) '{' << pix.red << ", " << pix.green << ", " << pix.blue << '}'
 
