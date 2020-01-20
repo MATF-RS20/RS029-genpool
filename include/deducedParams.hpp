@@ -43,7 +43,7 @@ double getAccessability(
         differentialSumm += abs(h - height);
     }
 
-    return static_cast<double>(differentialSumm) * 90 / neighbours.size();
+    return static_cast<double>(1-((differentialSumm) * 90 / neighbours.size()));
 }
 
 /**
@@ -116,7 +116,7 @@ HeatMap& createAccessabilityMap(HeatMap& accessability_in_out) {
         auto neighbours = getSimpleNeighbours(j, i, heightMap);
 
         double colorVal = getAccessability(height, moisture, heat, neighbours);
-        RGB color = colorVal == 0 ? RGB{0, 0, 0} : colorBijection(colorVal);
+        RGB color = colorVal == 0 ? RGB{255, 0, 0} : colorBijection(1-colorVal);
 
         accessability_in_out[i][j].red = color[0];
         accessability_in_out[i][j].green = color[1];

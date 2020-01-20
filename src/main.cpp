@@ -89,7 +89,7 @@ void initState()
    std::cout << "getting height map data\n";
    #endif
 
-   imageData = getImageData(moistureMap);
+   imageData = getImageData(accessability);
 }
 void reshape(int w, int h)
 {
