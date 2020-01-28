@@ -3,7 +3,7 @@
 #include "simulation.hpp"
 #include "HeatMap.hpp"
 
-Simulation sim{100, 100'000};
+
 
 /* PARAMS
  * Pictures from google that are heat maps in different color schemes which will

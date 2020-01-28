@@ -19,9 +19,10 @@
 #define window_height 767
 
 // -------------------------------TMP state-------------------------------------
-png::image<png::rgba_pixel> image("assets/precipitationEdited.png");
+png::image<png::rgba_pixel> image("assets/heightEdited.png");
 GLvoid *imageData;
-
+Simulation sim(1,100,image);
+int n=1;
 // --------------------------------------------------------------------------
 
 static GLuint texName;
@@ -83,13 +84,13 @@ void initGlut(void)
 
 void initState()
 {
-   invertColors(image);
+   //invertColors(image);
 
    #ifdef LOG
    std::cout << "getting height map data\n";
    #endif
 
-   imageData = getImageData(accessability);
+   imageData = getImageData(image);
 }
 void reshape(int w, int h)
 {
@@ -118,10 +119,12 @@ void renderFrame()
 
 void engine(void)
 {
-
-   sim.nextFrame();
+if(sim._current_frame<sim._max_duration){
+image=sim.nextFrame();
+imageData = getImageData(image);
+}
+   sim._current_frame++;
    renderFrame();
-
    glutPostRedisplay();
 }
 
@@ -186,8 +189,8 @@ void init(int argc, char **argv)
    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
    initWindow();
    initGlut();
-   normalizeParams();
-   makeDeducedParams();
+   //normalizeParams();
+   //makeDeducedParams();
    initState();
    registerIOCallbacks();
 }
