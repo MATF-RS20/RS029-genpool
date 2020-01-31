@@ -21,7 +21,7 @@
 // -------------------------------TMP state-------------------------------------
 png::image<png::rgba_pixel> image("assets/heightEdited.png");
 GLvoid *imageData;
-Simulation sim(1,100,image);
+Simulation sim(1,40,image);
 int n=1;
 // --------------------------------------------------------------------------
 
