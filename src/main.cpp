@@ -5,6 +5,9 @@
 #include <array>
 #include <cstdlib>
 #include <cmath>
+#include <cstdio>
+
+
 
 //https://www.nongnu.org/pngpp/doc/0.2.0/
 #include <png++/png.hpp>
@@ -21,11 +24,14 @@
 // -------------------------------TMP state-------------------------------------
 png::image<png::rgba_pixel> image("assets/heightEdited.png");
 GLvoid *imageData;
-Simulation sim(1,40,image);
+Simulation sim(1,10,image);
 int n=1;
+double suma = 0;
+double suma2 = 0;
+double suma3 = 0;
+static GLuint texName;
 // --------------------------------------------------------------------------
 
-static GLuint texName;
 /**
  * Tests png image lib functions and methods
  */
@@ -120,7 +126,7 @@ void renderFrame()
 void engine(void)
 {
 if(sim._current_frame<sim._max_duration){
-image=sim.nextFrame();
+image = sim.nextFrame();
 imageData = getImageData(image);
 }
    sim._current_frame++;
@@ -153,7 +159,50 @@ void keyboard(unsigned char key, int x, int y)
    case 27:
       exit(0);
       break;
+      //green tribe
+   case 'g':
+
+     std::cout << "Iteration number " << sim._current_frame << " is current iteration" << std::endl;
+   
+     for(auto &n:sim.live_people1){
+        suma+=n.second.first;
+      }
+   //Total sum of people in green tribe:
+      std::cout << "Total sum of green tribe in " << sim._current_frame << " iteration is: " << suma << std::endl;
+      std::cout << "Average number of people per pixel " << suma/sim.live_people1.size() << std::endl;
+      std::cout << "Colored area " << sim.live_people1.size() << " pixels" << std::endl; 
+      std::cout << std::endl; 
+      break;
+
+   case 'r':
+       
+      std::cout << "Iteration number " << sim._current_frame << " is current iteration" << std::endl;
+   
+      for(auto &n:sim.live_people2){
+         suma2+=n.second.first;
+      }
+   //Total sum of people in red tribe:
+      std::cout << "Total sum of red tribe in " << sim._current_frame << " iteration is: " << suma2 << std::endl;
+      std::cout << "Average number of people per pixel " << suma2/sim.live_people2.size() << std::endl;
+      std::cout << "Colored area " << sim.live_people2.size() << " pixels" << std::endl;
+      std::cout << std::endl;
+      break;
+   case 'b':
+
+      std::cout << "Iteration number " << sim._current_frame << " is current iteration" << std::endl;
+      //double suma3 = 0;
+      for(auto &n:sim.live_people3){
+         suma3+=n.second.first;
+      }
+   //Total sum of people in blue tribe:
+      std::cout << "Total sum of blue tribe in " << sim._current_frame << " iteration is : " << suma3 << std::endl;
+      std::cout << "Average number of people per pixel " << suma3/sim.live_people3.size() << std::endl;
+      std::cout << "Colored area " << sim.live_people3.size() << " pixels" << std::endl;
+      std::cout << std::endl;  
+      break;
+ 
    default:
+      std::cout << "Press one of options [r|g|b]" << std::endl;
       break;
    }
 }
@@ -166,9 +215,10 @@ void registerIOCallbacks()
     * and manages state. Also engine calls it self by invoking post redisplay
     * which gives oportunity for other io functions to execute
     */
+   
    glutDisplayFunc(engine);
    glutReshapeFunc(reshape);
-   glutKeyboardFunc(keyboard);
+  
 }
 
 void initWindow()
@@ -192,13 +242,19 @@ void init(int argc, char **argv)
    //normalizeParams();
    //makeDeducedParams();
    initState();
+   //
+   glutKeyboardFunc(keyboard);
    registerIOCallbacks();
 }
 
 int main(int argc, char **argv)
-{
-   init(argc, argv);
-   glutMainLoop();
+{ 
+  init(argc, argv);
+  
+  glutMainLoop();
+
+ 
+  
 }
 
 void normalizeParams()

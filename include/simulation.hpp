@@ -4,7 +4,8 @@
 #include <png++/png.hpp>
 #include <RGB.hpp>
 #include <state.hpp>
-#include<map>
+#include <cstdlib>
+#include <map>
 
 typedef png::image<png::rgba_pixel> HeatMap;
 /**
@@ -45,6 +46,9 @@ public:
    /**
     * Make first generation of tribes
     */
+
+
+  
    void makeTribes(){
 
      for (int y = 390; y < 400; y++){
@@ -55,8 +59,8 @@ public:
          lastFrame[y+18][x-10] = png::rgba_pixel( 0,0,255, 255);
          
          double vrednost1=colorBijection(toRGB(dis[y][x]));
-         double vrednost2=colorBijection(toRGB(dis[y][x]));
-         double vrednost3=colorBijection(toRGB(dis[y][x]));
+         double vrednost2=colorBijection(toRGB(dis[y+25][x-20]));
+         double vrednost3=colorBijection(toRGB(dis[y+18][x-10]));
         
         live_people1[std::make_pair(x,y)]=std::make_pair(10,vrednost1);
         live_people2[std::make_pair(x-20,y+25)]=std::make_pair(10,vrednost2);
@@ -74,7 +78,7 @@ public:
     std::map<std::pair<int,int>,std::pair<double,double>> change_copy,
     std::map<std::pair<int,int>,std::pair<double,double>> first,
      std::map<std::pair<int,int>,std::pair<double,double>> second,double num){
-  
+ 
       auto iter=change_copy.find(std::make_pair(x,y));
       if(iter == change_copy.end()){
          
@@ -87,6 +91,7 @@ public:
       if (upAccesssibility<0.9 || upFerlity>0.4){
      
          bool win = true;
+        
          if(find_first!=first.end()){
             win &= find_first->second.first < num;
          }
@@ -104,8 +109,8 @@ public:
         }else{
         lastFrame[y][x] = png::rgba_pixel( 0,0,255, 255);
         }
-         
-         change[std::make_pair(x,y)]=std::make_pair(100,vrednost);}
+      
+         change[std::make_pair(x,y)]=std::make_pair(num/5,vrednost);}
        
       }
 
@@ -113,8 +118,9 @@ public:
       }
    }
      /**
-       * In each generation tribes chack if they can expands N,W,S,E
+       * In each generation tribes check if they can expands N,W,S,E
        */
+      
     void expandingTribes( std::map<std::pair<int,int>,std::pair<double,double>> &change
                           ,std::map<std::pair<int,int>,std::pair<double,double>> change_copy
                          ,std::map<std::pair<int,int>,std::pair<double,double>> first
@@ -124,8 +130,8 @@ public:
 
       int x = m.first.first;
       int y = m.first.second;
-
-      m.second.first=(m.second.first/2*4+m.second.first)*(1-colorBijection(toRGB(dis[y][x])));
+      
+      m.second.first=(m.second.first/2*(rand()%10+1)+m.second.first)*(1-colorBijection(toRGB(dis[y][x])));
       double currentTribes_num=m.second.first;
       
       testTheExpansion(x,y+1,change,change_copy,first,second,currentTribes_num);
@@ -144,7 +150,7 @@ public:
      */
    HeatMap nextFrame(){
 
-      std::cout <<_current_frame<< " racunam\n";
+     // std::cout <<_current_frame<< " racunam\n";
 
 
       if (_current_frame == 1){
@@ -159,9 +165,9 @@ public:
 
 
       }
-     std::cout<<live_people1.size()<<std::endl;
-     std::cout<<live_people2.size()<<std::endl;
-     std::cout<<live_people3.size()<<std::endl;
+    // std::cout<<live_people1.size()<<std::endl;
+     //std::cout<<live_people2.size()<<std::endl;
+     //std::cout<<live_people3.size()<<std::endl;
 
      return lastFrame;
 
