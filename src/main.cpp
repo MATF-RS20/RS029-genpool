@@ -24,11 +24,16 @@
 // -------------------------------TMP state-------------------------------------
 png::image<png::rgba_pixel> image("assets/heightEdited.png");
 GLvoid *imageData;
-Simulation sim(1,10,image);
+Simulation sim(1,100,image);
 int n=1;
 double suma = 0;
 double suma2 = 0;
 double suma3 = 0;
+double suma4 = 0;
+double suma5 = 0;
+double suma6 = 0;
+double suma7 = 0;
+double suma8 = 0;
 static GLuint texName;
 // --------------------------------------------------------------------------
 
@@ -173,7 +178,7 @@ void keyboard(unsigned char key, int x, int y)
       std::cout << "Colored area " << sim.live_people1.size() << " pixels" << std::endl; 
       std::cout << std::endl; 
       break;
-
+   //red tribe
    case 'r':
        
       std::cout << "Iteration number " << sim._current_frame << " is current iteration" << std::endl;
@@ -187,10 +192,11 @@ void keyboard(unsigned char key, int x, int y)
       std::cout << "Colored area " << sim.live_people2.size() << " pixels" << std::endl;
       std::cout << std::endl;
       break;
+   //blue tribe
    case 'b':
 
       std::cout << "Iteration number " << sim._current_frame << " is current iteration" << std::endl;
-      //double suma3 = 0;
+      
       for(auto &n:sim.live_people3){
          suma3+=n.second.first;
       }
@@ -200,7 +206,76 @@ void keyboard(unsigned char key, int x, int y)
       std::cout << "Colored area " << sim.live_people3.size() << " pixels" << std::endl;
       std::cout << std::endl;  
       break;
- 
+   //ligth blue tribe
+   case 'l':
+
+      std::cout << "Iteration number " << sim._current_frame << " is current iteration" << std::endl;
+     
+      for(auto &n:sim.live_people4){
+         suma4+=n.second.first;
+      }
+   //Total sum of people in light blue tribe:
+      std::cout << "Total sum of light blue tribe in " << sim._current_frame << " iteration is : " << suma4 << std::endl;
+      std::cout << "Average number of people per pixel " << suma4/sim.live_people4.size() << std::endl;
+      std::cout << "Colored area " << sim.live_people4.size() << " pixels" << std::endl;
+      std::cout << std::endl;  
+      break;
+   //yellow tribe
+   case 'y':
+
+      std::cout << "Iteration number " << sim._current_frame << " is current iteration" << std::endl;
+   
+      for(auto &n:sim.live_people5){
+         suma5+=n.second.first;
+      }
+   //Total sum of people in yellow tribe:
+      std::cout << "Total sum of yellow tribe in " << sim._current_frame << " iteration is : " << suma5 << std::endl;
+      std::cout << "Average number of people per pixel " << suma5/sim.live_people5.size() << std::endl;
+      std::cout << "Colored area " << sim.live_people5.size() << " pixels" << std::endl;
+      std::cout << std::endl;  
+      break;
+   //purple tribe
+   case 'p':
+
+      std::cout << "Iteration number " << sim._current_frame << " is current iteration" << std::endl;
+     
+      for(auto &n:sim.live_people6){
+         suma6+=n.second.first;
+      }
+   //Total sum of people in purple tribe:
+      std::cout << "Total sum of purple tribe in " << sim._current_frame << " iteration is : " << suma6 << std::endl;
+      std::cout << "Average number of people per pixel " << suma6/sim.live_people6.size() << std::endl;
+      std::cout << "Colored area " << sim.live_people6.size() << " pixels" << std::endl;
+      std::cout << std::endl;  
+      break;
+   //coral tribe (India)
+   case 'c':
+
+      std::cout << "Iteration number " << sim._current_frame << " is current iteration" << std::endl;
+     
+      for(auto &n:sim.live_people7){
+         suma7+=n.second.first;
+      }
+   //Total sum of people in coral tribe:
+      std::cout << "Total sum of coral tribe in " << sim._current_frame << " iteration is : " << suma7 << std::endl;
+      std::cout << "Average number of people per pixel " << suma7/sim.live_people7.size() << std::endl;
+      std::cout << "Colored area " << sim.live_people7.size() << " pixels" << std::endl;
+      std::cout << std::endl;  
+      break;
+   //grey tribe
+   case 's':
+
+      std::cout << "Iteration number " << sim._current_frame << " is current iteration" << std::endl;
+     
+      for(auto &n:sim.live_people8){
+         suma8+=n.second.first;
+      }
+   //Total sum of people in grey tribe:
+      std::cout << "Total sum of grey tribe in " << sim._current_frame << " iteration is : " << suma8 << std::endl;
+      std::cout << "Average number of people per pixel " << suma8/sim.live_people8.size() << std::endl;
+      std::cout << "Colored area " << sim.live_people8.size() << " pixels" << std::endl;
+      std::cout << std::endl;  
+      break;
    default:
       std::cout << "Press one of options [r|g|b]" << std::endl;
       break;
